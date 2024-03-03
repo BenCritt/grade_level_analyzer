@@ -1,16 +1,8 @@
 from django.shortcuts import render
-from .forms import QRForm
 import os
-import qrcode
 from django.http import HttpResponse
-from .forms import WeatherForm
 import requests
 import json
-import datetime
-from pyzipcode import ZipCodeDatabase
-import numpy as np
-import matplotlib.pyplot as plt
-from .forms import MonteCarloForm
 from django.shortcuts import redirect
 from django.conf import settings
 from .forms import TextForm
