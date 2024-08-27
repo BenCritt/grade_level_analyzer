@@ -1,32 +1,28 @@
-from django.shortcuts import render
-import os
-from django.http import HttpResponse
-import requests
-import json
-from django.shortcuts import redirect
-from django.conf import settings
-from .forms import TextForm
-import textstat
-
-
+# This is the code for the Grade Level Analyzer.
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def grade_level_analyzer(request):
+    # Check if the request method is POST.
     if request.method == "POST":
+        # Initialize the form with data from the request.
         form = TextForm(request.POST)
+        # Validate the form.
         if form.is_valid():
+            # Extract the input text from the form.
             input_text = form.cleaned_data["text"]
+            # Calculate readability scores using different indices.
             results = {
                 "flesch_kincaid_grade": textstat.flesch_kincaid_grade(input_text),
                 "gunning_fog": textstat.gunning_fog(input_text),
                 "coleman_liau_index": textstat.coleman_liau_index(input_text),
             }
-            # Calculate the weighted average of the scores
+            # Calculate the weighted average of the scores.
             average_score = round(
                 (0.5 * results["flesch_kincaid_grade"])
                 + (0.3 * results["gunning_fog"])
                 + (0.2 * results["coleman_liau_index"]),
                 1,
             )
-            # Calculate the uniform average of the scores
+            # Calculate the uniform average of the scores.
             uniform_average_score = round(
                 (
                     results["flesch_kincaid_grade"]
@@ -36,16 +32,17 @@ def grade_level_analyzer(request):
                 / 3,
                 1,
             )
-            # Add the average scores to the results dictionary
+            # Add the calculated scores to the results dictionary.
             results["average_score"] = average_score
             results["uniform_average_score"] = uniform_average_score
-            # Define the context with results and form
+            # Prepare the context with the form and results for rendering.
             context = {"form": form, "results": results}
+            # Render the results page with the context.
             return render(request, "projects/grade_level_results.html", context)
         else:
-            # Form is not valid, re-render the page with the form
+            # If the form is invalid, re-render the page with the form.
             return render(request, "projects/grade_level_analyzer.html", {"form": form})
     else:
-        # GET request, so create a new form and render the page
+        # If the request is not POST, create a new form and render the page.
         form = TextForm()
         return render(request, "projects/grade_level_analyzer.html", {"form": form})
